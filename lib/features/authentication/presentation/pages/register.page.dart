@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/presentation/components/my.button.dart';
 import 'package:flutter_social_project/features/authentication/presentation/components/my.text.field.dart';
+import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
 
 class RegisterPage extends StatefulWidget {
   final void Function()? togglePages;
@@ -14,8 +16,53 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
-  final pswController = TextEditingController();
-  final confirmPswController = TextEditingController();
+  final pwController = TextEditingController();
+  final confirmPwController = TextEditingController();
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    nameController.dispose();
+    emailController.dispose();
+    pwController.dispose();
+    confirmPwController.dispose();
+    super.dispose();
+  }
+
+  void register() {
+    final String name = nameController.text;
+    final String email = emailController.text;
+    final String pw = pwController.text;
+    final String confirmPw = confirmPwController.text;
+
+    // auth cubit
+    final authCubit = context.read<AuthCubit>();
+
+    // ensure the fields aren't empty
+    if (email.isNotEmpty &&
+        name.isNotEmpty &&
+        pw.isNotEmpty &&
+        confirmPw.isNotEmpty) {
+      // ensure passwords match
+      if (pw == confirmPw) {
+        // TODO: Add logic for successful registration
+        authCubit.register(name, email, pw);
+      }
+      // passwords don't match
+      else {
+        // TODO: Add logic to handle password mismatch
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Passwords do not match!")),
+        );
+      }
+    }
+    // fields are empty -> display error
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email/Password is wrong!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   height: 10,
                 ),
                 MyTextField(
-                    controller: pswController,
+                    controller: pwController,
                     hintText: 'Password',
                     obscureText: true),
                 const SizedBox(
@@ -70,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
 
                 MyTextField(
-                    controller: confirmPswController,
+                    controller: confirmPwController,
                     hintText: 'Confirm Password',
                     obscureText: true),
                 const SizedBox(
@@ -80,7 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 // register button
                 MyButton(
                   text: "Register",
-                  onTap: () {},
+                  onTap: register,
                 ),
                 const SizedBox(
                   height: 15,

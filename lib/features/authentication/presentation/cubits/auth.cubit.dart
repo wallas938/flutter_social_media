@@ -10,7 +10,7 @@ class AuthCubit extends Cubit<AuthStates> {
   AuthCubit({required this.authRepository}) : super(AuthInitial());
 
   // check if user is already authenticated
-  void checkAuth()  {
+  void checkAuth() async {
     AppUser? user = authRepository.getCurrentUser();
 
     if (user != null) {
@@ -26,6 +26,8 @@ class AuthCubit extends Cubit<AuthStates> {
 
   // login with email + password
   Future<void> login(String email, String password) async {
+    emit(AuthLoading());
+
     try {
       AppUser? user =
           await authRepository.loginWithEmailPassword(email, password);
@@ -38,15 +40,18 @@ class AuthCubit extends Cubit<AuthStates> {
       emit(Unauthenticated());
     } catch (e) {
       emit(AuthError(message: e.toString()));
+
       emit(Unauthenticated());
     }
   }
 
   // Register a new user
-  Future<void> register(String email, String name, String password) async {
+  Future<void> register(String name, String email, String password) async {
+    emit(AuthLoading());
+
     try {
       AppUser? user =
-          await authRepository.registerWithEmailPassword(email, name, password);
+          await authRepository.registerWithEmailPassword(name, email, password);
 
       if (user != null) {
         emit(Authenticated(user: user));
