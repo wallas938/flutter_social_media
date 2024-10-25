@@ -13,19 +13,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final authCubit = context.read<AuthCubit>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("H O M E"),
-        actions: [
-          // logout button
-          IconButton(
-              onPressed: () {
-                authCubit.logout();
-              },
-              icon: const Icon(Icons.logout)),
-        ],
+        actions: [],
       ),
       drawer: const MyDrawer(),
     );

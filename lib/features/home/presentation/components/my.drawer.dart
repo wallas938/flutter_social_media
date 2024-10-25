@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
 import 'package:flutter_social_project/features/home/presentation/components/my.drawer.title.dart';
 import 'package:flutter_social_project/features/profile/presentation/pages/profile.page.dart';
 
@@ -7,11 +9,11 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final authCubit = context.read<AuthCubit>();
+
     return Drawer(
-      backgroundColor: Theme
-          .of(context)
-          .colorScheme
-          .surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
@@ -24,18 +26,12 @@ class MyDrawer extends StatelessWidget {
                 child: Icon(
                   Icons.person,
                   size: 80,
-                  color: Theme
-                      .of(context)
-                      .colorScheme
-                      .primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
 
               Divider(
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .secondary,
+                color: Theme.of(context).colorScheme.secondary,
               ),
 
               // home tile
@@ -56,7 +52,6 @@ class MyDrawer extends StatelessWidget {
                       builder: (context) => const ProfilePage(),
                     ),
                   );
-
                 },
               ),
 
@@ -77,7 +72,7 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: "L O G O U T",
                 icon: Icons.logout,
-                onTap: () {},
+                onTap: () => authCubit.logout(),
               ),
             ],
           ),
