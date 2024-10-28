@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/domain/entities/app.user.dart';
@@ -34,7 +35,6 @@ class _ProfilePageState extends State<ProfilePage> {
 // BUILD UI
   @override
   Widget build(BuildContext context) {
-
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         // loaded
@@ -53,12 +53,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditProfilePage(user: user,),
+                      builder: (context) => EditProfilePage(
+                        user: user,
+                      ),
                     ), // MaterialPageRoute
                   ),
                   icon: const Icon(Icons.settings),
                 ), // IconButton
-
               ],
             ), // AppBar
 
@@ -68,28 +69,38 @@ class _ProfilePageState extends State<ProfilePage> {
                 // email
                 Text(
                   user.email,
-                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
                 ), // Text
 
                 const SizedBox(height: 25),
-
                 // profile pic
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    borderRadius: BorderRadius.circular(12),
-                  ), // BoxDecoration
-                  height: 120,
-                  width: 120,
-                  padding: const EdgeInsets.all(25),
-                  child: Center(
-                    child: Icon(
-                      Icons.person,
-                      size: 72,
-                      color: Theme.of(context).colorScheme.primary,
-                    ), // Icon
-                  ), // Center
-                ), // Container
+                CachedNetworkImage(
+                  imageUrl: user.profileImageUrl,
+                  // loading..
+                  placeholder: (context, url) =>
+                      const CircularProgressIndicator(),
+
+                  // error -> failed to load
+                  errorWidget: (context, url, error) => Icon(
+                    Icons.person,
+                    size: 72,
+                    color: Theme.of(context).colorScheme.primary,
+                  ), // Icon
+
+                  // loaded
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 120,
+                    width: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      ),
+                    ), // BoxDecoration
+                  ), // Container
+                ), // CachedNetworkImage
 
                 const SizedBox(height: 25),
 
@@ -128,7 +139,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 ), // Paddi
               ],
             ), // Center
-
           ); // Scaffold
         }
 
@@ -146,6 +156,5 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       },
     );
-
   }
 }

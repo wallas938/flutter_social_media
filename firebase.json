@@ -1,1 +1,15 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"flutter-social-project-aee80","configurations":{"ios":"1:31177213497:ios:1a19afcb5115a87af6afe8","web":"1:31177213497:web:46bb4ef0b6e67dc4f6afe8"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "flutter-social-project-aee80",
+          "configurations": {
+            "ios": "1:31177213497:ios:1a19afcb5115a87af6afe8",
+            "web": "1:31177213497:web:46bb4ef0b6e67dc4f6afe8"
+          }
+        }
+      }
+    }
+  }
+}
