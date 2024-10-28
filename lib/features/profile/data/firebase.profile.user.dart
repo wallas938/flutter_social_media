@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/domain/repository/profile.repository.dart';
 
-class FirebaseProfileRepo implements ProfileRepository {
+class FirebaseProfileRepository implements ProfileRepository {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
   @override
@@ -16,12 +16,13 @@ class FirebaseProfileRepo implements ProfileRepository {
         final userData = userDoc.data();
 
         if (userData != null) {
+
           return ProfileUser(
             uid: uid,
             email: userData['email'],
             name: userData['name'],
-            bio: userData['bio'],
-            profileImageUrl: userData['profileImageUrl'].toString(),
+            bio: userData['bio'] ?? '',
+            profileImageUrl: userData['profileImageUrl'].toString()  ?? '',
           );
         }
       }

@@ -5,6 +5,9 @@ import 'package:flutter_social_project/features/authentication/presentation/cubi
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.states.dart';
 import 'package:flutter_social_project/features/authentication/presentation/pages/auth.page.dart';
 import 'package:flutter_social_project/features/home/presentation/pages/home.page.dart';
+import 'package:flutter_social_project/features/profile/data/firebase.profile.user.dart';
+import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
+import 'package:flutter_social_project/features/storage/data/firebase.storage.repository.dart';
 import 'package:flutter_social_project/themes/light.mode.dart';
 /*
 APP – Root Level
@@ -27,15 +30,31 @@ Check Auth State
 
 class MyApp extends StatelessWidget {
   // auth repo
-  final authRepo = FirebaseAuthRepository();
+  final firebaseAuthRepo = FirebaseAuthRepository();
+
+// profile repo
+  final firebaseProfileRepo = FirebaseProfileRepository();
+
+// storage repo
+  final firebaseStorageRepo = FirebaseStorageRepository();
+
 
   MyApp({super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => AuthCubit(authRepository: authRepo)..checkAuth(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              AuthCubit(authRepository: firebaseAuthRepo)..checkAuth(),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ProfileCubit(profileRepository: firebaseProfileRepo, storageRepository: firebaseStorageRepo),
+        ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: lightMode,
