@@ -16,7 +16,19 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("H O M E"),
-        actions: [],
+        actions: [
+          // upload new post button
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => UploadPostPage(),
+              ), // MaterialPageRoute
+            ),
+            icon: const Icon(Icons.add),
+          ), // IconButton
+
+        ],
       ),
       drawer: const MyDrawer(),
     );
