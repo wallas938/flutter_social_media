@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/posts/data/firebase.post.repository.dart';
 import 'package:flutter_social_project/features/posts/domain/entities/post.dart';
-import 'package:flutter_social_project/features/posts/domain/repository/post.repository.dart';
 import 'package:flutter_social_project/features/posts/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/storage/domain/storage.repository.dart';
 
@@ -11,7 +10,7 @@ class PostCubit extends Cubit<PostState> {
   final FirebasePostRepository fireBasePostRepository;
   final StorageRepository storageRepository;
 
-  PostCubit(this.fireBasePostRepository, this.storageRepository)
+  PostCubit({required this.fireBasePostRepository, required this.storageRepository})
       : super(PostsInitial());
 
   // create a new post
@@ -23,7 +22,7 @@ class PostCubit extends Cubit<PostState> {
       // handle image upload for mobile platforms (using file path)
       if (imagePath != null) {
         emit(PostUploading());
-        imageUrl = await storageRepository.uploadProfileImageMobile(
+        imageUrl = await storageRepository.uploadPostImageMobile(
             imagePath, post.id);
       }
 
@@ -31,7 +30,7 @@ class PostCubit extends Cubit<PostState> {
       else if (imageBytes != null) {
         emit(PostUploading());
         imageUrl =
-            await storageRepository.uploadProfileImageWeb(imageBytes, post.id);
+            await storageRepository.uploadPostImageWeb(imageBytes, post.id);
       }
 
       // give image url to post
@@ -39,28 +38,33 @@ class PostCubit extends Cubit<PostState> {
 
       // create post in the backend
       fireBasePostRepository.createPost(newPost);
+
+      fetchAllPosts();
+
     } catch (e) {
       emit(PostsError("Failed to create post: $e"));
     }
 
-    // fetch all posts
-    Future<void> fetchAllPosts() async {
-      try {
-        emit(PostsLoading());
-        final posts = await fireBasePostRepository.fetchAllPosts();
-        emit(PostsLoaded(posts));
-      } catch (e) {
-        emit(PostsError("Failed to fetch posts: $e"));
-      }
-    }
+  }
 
-    // delete a post
-    Future<void> deletePost(String postId) async {
-      try {
-        await fireBasePostRepository.deletePost(postId);
-      } catch (e) {
-        emit(PostsError("Failed to delete post: $e"));
-      }
+  // fetch all posts
+  Future<void> fetchAllPosts() async {
+    try {
+      emit(PostsLoading());
+      final posts = await fireBasePostRepository.fetchAllPosts();
+      emit(PostsLoaded(posts));
+    } catch (e) {
+      emit(PostsError("Failed to fetch posts: $e"));
     }
   }
+
+  // delete a post
+  Future<void> deletePost(String postId) async {
+    try {
+      await fireBasePostRepository.deletePost(postId);
+    } catch (e) {
+      emit(PostsError("Failed to delete post: $e"));
+    }
+  }
+
 }

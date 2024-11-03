@@ -64,4 +64,18 @@ class FirebaseStorageRepository implements StorageRepository {
       return null;
     }
   }
+
+  /*
+    POST IMAGES - upload images to storage
+  */
+
+  @override
+  Future<String?> uploadPostImageMobile(String path, String fileName) {
+    return _uploadFile(path, fileName, "post_images");
+  }
+
+  @override
+  Future<String?> uploadPostImageWeb(Uint8List fileBytes, String fileName) {
+    return _uploadFileBytes(fileBytes, fileName, "post_images");
+  }
 }

@@ -11,7 +11,7 @@ class AuthCubit extends Cubit<AuthStates> {
 
   // check if user is already authenticated
   void checkAuth() async {
-    AppUser? user = authRepository.getCurrentUser();
+    AppUser? user = await authRepository.getCurrentUser();
 
     if (user != null) {
       _currentUser = user;

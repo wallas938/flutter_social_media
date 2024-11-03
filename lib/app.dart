@@ -5,6 +5,8 @@ import 'package:flutter_social_project/features/authentication/presentation/cubi
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.states.dart';
 import 'package:flutter_social_project/features/authentication/presentation/pages/auth.page.dart';
 import 'package:flutter_social_project/features/home/presentation/pages/home.page.dart';
+import 'package:flutter_social_project/features/posts/data/firebase.post.repository.dart';
+import 'package:flutter_social_project/features/posts/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/profile/data/firebase.profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 import 'package:flutter_social_project/features/storage/data/firebase.storage.repository.dart';
@@ -35,9 +37,11 @@ class MyApp extends StatelessWidget {
 // profile repo
   final firebaseProfileRepo = FirebaseProfileRepository();
 
+  // post repo
+  final firebasePostRepo = FirebasePostRepository();
+
 // storage repo
   final firebaseStorageRepo = FirebaseStorageRepository();
-
 
   MyApp({super.key});
 
@@ -51,8 +55,14 @@ class MyApp extends StatelessWidget {
               AuthCubit(authRepository: firebaseAuthRepo)..checkAuth(),
         ),
         BlocProvider(
-          create: (context) =>
-              ProfileCubit(profileRepository: firebaseProfileRepo, storageRepository: firebaseStorageRepo),
+          create: (context) => ProfileCubit(
+              profileRepository: firebaseProfileRepo,
+              storageRepository: firebaseStorageRepo),
+        ),
+        BlocProvider(
+          create: (context) => PostCubit(
+              fireBasePostRepository: firebasePostRepo,
+              storageRepository: firebaseStorageRepo),
         ),
       ],
       child: MaterialApp(

@@ -5,21 +5,31 @@ import 'package:flutter_social_project/features/authentication/domain/repository
 
 class FirebaseAuthRepository implements AuthRepository {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Future<AppUser?> registerWithEmailPassword(
       String name, String email, String password) async {
     try {
       // create a new user
-      final UserCredential userData = await firebaseAuth
+      final UserCredential userCredential = await firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
+// fetch user document from firestore
+      DocumentSnapshot userDoc = await firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .get();
 
-      // a new user is created for the app
-      AppUser user = AppUser(uid: userData.user!.uid, name: name, email: email);
+// create user
+      AppUser user = AppUser(
+        uid: userCredential.user!.uid,
+        email: email,
+        name: userDoc['name'],
+      );
+
 
       // the newly created user is stored into the firestore database in users collection
-      await firebaseFirestore
+      await firestore
           .collection("users")
           .doc(user.uid)
           .set(user.toJson());
@@ -45,14 +55,29 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  AppUser? getCurrentUser() {
+  Future<AppUser?> getCurrentUser() async {
     // Get Current User
-    final currentUser = firebaseAuth.currentUser;
+    final firebaseUser = firebaseAuth.currentUser;
 
     // no user logged in..
-    if (currentUser == null) return null;
+    if (firebaseUser == null) return null;
 
-    return AppUser(uid: currentUser.uid, name: '', email: currentUser.email!);
+    /// fetch user document from firestore
+    DocumentSnapshot userDoc =
+    await firestore.collection("users").doc(firebaseUser.uid).get();
+
+// check if user doc exists
+    if (!userDoc.exists) {
+      return null;
+    }
+
+// user exists
+    return AppUser(
+      uid: firebaseUser.uid,
+      email: firebaseUser.email!,
+      name: userDoc['name'],
+    );
+
   }
 
   @override
