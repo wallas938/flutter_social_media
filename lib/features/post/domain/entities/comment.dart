@@ -1,53 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Post {
+class Comment {
   final String id;
+  final String postId;
   final String userId;
   final String userName;
   final String text;
-  final String imageUrl;
   final DateTime timestamp;
 
-  Post({
+  Comment({
     required this.id,
+    required this.postId,
     required this.userId,
     required this.userName,
     required this.text,
-    required this.imageUrl,
     required this.timestamp,
   });
 
-  Post copyWith({String? imageUrl}) {
-    return Post(
-      id: id,
-      userId: userId,
-      userName: userName,
-      text: text,
-      imageUrl: imageUrl ?? this.imageUrl,
-      timestamp: timestamp,
-    );
-  }
-
-// convert post -> json
+  // convert comment -> json
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'postId': postId,
       'userId': userId,
-      'name': userName,
+      'userName': userName,
       'text': text,
-      'imageUrl': imageUrl,
       'timestamp': Timestamp.fromDate(timestamp),
     };
   }
 
-// convert json -> post
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
+  // convert json -> comment
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
       id: json['id'],
+      postId: json['postId'],
       userId: json['userId'],
-      userName: json['name'],
+      userName: json['userName'],
       text: json['text'],
-      imageUrl: json['imageUrl'],
       timestamp: (json['timestamp'] as Timestamp).toDate(),
     );
   }

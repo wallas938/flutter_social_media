@@ -1,16 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_project/features/posts/data/firebase.post.repository.dart';
-import 'package:flutter_social_project/features/posts/domain/entities/post.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.states.dart';
+import 'package:flutter_social_project/features/post/data/firebase.post.repository.dart';
+import 'package:flutter_social_project/features/post/domain/entities/comment.dart';
+import 'package:flutter_social_project/features/post/domain/entities/post.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/storage/domain/storage.repository.dart';
 
 class PostCubit extends Cubit<PostState> {
   final FirebasePostRepository fireBasePostRepository;
   final StorageRepository storageRepository;
 
-  PostCubit({required this.fireBasePostRepository, required this.storageRepository})
+  PostCubit(
+      {required this.fireBasePostRepository, required this.storageRepository})
       : super(PostsInitial());
 
   // create a new post
@@ -22,8 +24,8 @@ class PostCubit extends Cubit<PostState> {
       // handle image upload for mobile platforms (using file path)
       if (imagePath != null) {
         emit(PostUploading());
-        imageUrl = await storageRepository.uploadPostImageMobile(
-            imagePath, post.id);
+        imageUrl =
+            await storageRepository.uploadPostImageMobile(imagePath, post.id);
       }
 
       // handle image upload for web platforms (using file bytes)
@@ -40,11 +42,9 @@ class PostCubit extends Cubit<PostState> {
       fireBasePostRepository.createPost(newPost);
 
       fetchAllPosts();
-
     } catch (e) {
       emit(PostsError("Failed to create post: $e"));
     }
-
   }
 
   // fetch all posts
@@ -67,4 +67,34 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
+  // toggle like on a post
+  Future<void> toggleLikePost(String postId, String userId) async {
+    try {
+      await fireBasePostRepository.toggleLikePost(postId, userId);
+    } catch (e) {
+      emit(PostsError("Failed to toggle like: $e"));
+    }
+  }
+
+  // add a comment to a post
+  Future<void> addComment(String postId, Comment comment) async {
+    try {
+      await fireBasePostRepository.addComment(postId, comment);
+
+      await fetchAllPosts();
+    } catch (e) {
+      emit(PostsError("Failed to add comment: $e"));
+    }
+  }
+
+// delete comment from a post
+  Future<void> deleteComment(String postId, String commentId) async {
+    try {
+      await fireBasePostRepository.deleteComment(postId, commentId);
+
+      await fetchAllPosts();
+    } catch (e) {
+      emit(PostsError("Failed to delete comment: $e"));
+    }
+  }
 }

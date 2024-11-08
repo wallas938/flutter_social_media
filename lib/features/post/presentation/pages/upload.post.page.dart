@@ -8,9 +8,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/domain/entities/app.user.dart';
 import 'package:flutter_social_project/features/authentication/presentation/components/my.text.field.dart';
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
-import 'package:flutter_social_project/features/posts/domain/entities/post.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.cubit.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.states.dart';
+import 'package:flutter_social_project/features/post/domain/entities/post.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 
 class UploadPostPage extends StatefulWidget {
   const UploadPostPage({super.key});
@@ -80,6 +80,8 @@ class _UploadPostPageState extends State<UploadPostPage> {
       text: textController.text,
       imageUrl: '',
       timestamp: DateTime.now(),
+      likes: [],
+      comments: [],
     ); // Post
 
 // post cubit
@@ -107,10 +109,6 @@ class _UploadPostPageState extends State<UploadPostPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<PostCubit, PostState>(
       builder: (context, state) {
-        if (kDebugMode) {
-          print(state);
-          print(currentUser?.name);
-        }
         // loading or uploading..
         if (state is PostsLoading || state is PostUploading) {
           return const Scaffold(
@@ -152,7 +150,11 @@ class _UploadPostPageState extends State<UploadPostPage> {
         child: Column(
           children: [
             // image preview for web
-            if (kIsWeb && webImage != null) Image.memory(webImage!,width: double.infinity,),
+            if (kIsWeb && webImage != null)
+              Image.memory(
+                webImage!,
+                width: double.infinity,
+              ),
 
             // image preview for mobile
             if (!kIsWeb && imagePickedFile != null)

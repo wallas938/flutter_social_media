@@ -1,11 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/home/presentation/components/my.drawer.dart';
-import 'package:flutter_social_project/features/posts/presentation/components/post.tile.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.cubit.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.states.dart';
-import 'package:flutter_social_project/features/posts/presentation/pages/upload.post.page.dart';
+import 'package:flutter_social_project/features/post/presentation/components/post.tile.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
+import 'package:flutter_social_project/features/post/presentation/pages/upload.post.page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

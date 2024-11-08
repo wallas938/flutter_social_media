@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/domain/entities/app.user.dart';
+import 'package:flutter_social_project/features/authentication/presentation/components/my.text.field.dart';
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
-import 'package:flutter_social_project/features/posts/domain/entities/post.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/domain/entities/comment.dart';
+import 'package:flutter_social_project/features/post/domain/entities/post.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 
@@ -59,6 +61,95 @@ class _PostTileState extends State<PostTile> {
     }
   }
 
+/*
+  LIKES
+*/
+  // user tapped like button
+  void toggleLikePost() {
+    // current like status
+    final isLiked = widget.post.likes.contains(currentUser!.uid);
+
+    // optimistically like & update UI
+    setState(() {
+      if (isLiked) {
+        widget.post.likes.remove(currentUser!.uid); // unlike
+      } else {
+        widget.post.likes.add(currentUser!.uid); // like
+      }
+    });
+
+// update like
+    postCubit
+        .toggleLikePost(widget.post.id, currentUser!.uid)
+        .catchError((error) {
+      // if there's an error, revert back to original values
+      setState(() {
+        if (isLiked) {
+          widget.post.likes.add(currentUser!.uid); // revert like
+        } else {
+          widget.post.likes.remove(currentUser!.uid); // revert unlike
+        }
+      });
+    });
+
+    // update like
+    postCubit.toggleLikePost(widget.post.id, currentUser!.uid);
+  }
+
+  /*
+  COMMENTS
+  */
+
+  // comment text controller
+  final commentTextController = TextEditingController();
+
+// open comment box -> user wants to type a new comment
+  void openNewCommentBox() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: MyTextField(
+          controller: commentTextController,
+          hintText: "Type a comment",
+          obscureText: false,
+        ), // MyTextField
+        actions: [
+          // cancel button
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ), // TextButton
+
+// save button
+          TextButton(
+            onPressed: () {
+              addComment();
+              Navigator.of(context).pop();
+            },
+            child: const Text("Save"),
+          ), // TextButton
+        ],
+      ), // AlertDialog
+    );
+  }
+
+  void addComment() {
+    // create a new comment
+    final newComment = Comment(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      postId: widget.post.id,
+      userId: widget.post.userId,
+      userName: widget.post.userName,
+      text: commentTextController.text,
+      timestamp: DateTime.now(),
+    ); // Comment
+
+    // add comment using cubit
+    if (commentTextController.text.isNotEmpty) {
+      postCubit.addComment(widget.post.id, newComment);
+    }
+  }
+
   // show options for deletion
   void showOptions() {
     showDialog(
@@ -83,6 +174,11 @@ class _PostTileState extends State<PostTile> {
         ],
       ), // AlertDialog
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -158,14 +254,38 @@ class _PostTileState extends State<PostTile> {
             child: Row(
               children: [
                 // like button
-                const Icon(Icons.favorite_border),
-                const Text("0"),
+                GestureDetector(
+                  onTap: toggleLikePost,
+                  child: Icon(
+                    widget.post.likes.contains(currentUser!.uid)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: widget.post.likes.contains(currentUser!.uid)
+                        ? Colors.red
+                        : Theme.of(context).colorScheme.primary,
+                  ), // Icon
+                ), // GestureDetector
+
+                const SizedBox(width: 5),
+
+                // like count
+                Text(
+                  widget.post.likes.length.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 12,
+                  ), // TextStyle
+                ), //
 
                 const SizedBox(width: 20),
 
                 // comment button
-                const Icon(Icons.comment),
-                const Text("0"),
+                GestureDetector(
+                  onTap: openNewCommentBox,
+                  child: const Icon(Icons.comment),
+                ), // GestureDetector
+
+                Text(widget.post.comments.length.toString()),
 
                 const Spacer(),
 
@@ -173,7 +293,7 @@ class _PostTileState extends State<PostTile> {
                 Text(widget.post.timestamp.toString()),
               ],
             ),
-          )// CachedNetworkImage
+          ) // CachedNetworkImage
         ],
       ),
     ); // Column

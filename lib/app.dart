@@ -5,8 +5,8 @@ import 'package:flutter_social_project/features/authentication/presentation/cubi
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.states.dart';
 import 'package:flutter_social_project/features/authentication/presentation/pages/auth.page.dart';
 import 'package:flutter_social_project/features/home/presentation/pages/home.page.dart';
-import 'package:flutter_social_project/features/posts/data/firebase.post.repository.dart';
-import 'package:flutter_social_project/features/posts/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/data/firebase.post.repository.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/profile/data/firebase.profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 import 'package:flutter_social_project/features/storage/data/firebase.storage.repository.dart';

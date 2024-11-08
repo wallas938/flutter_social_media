@@ -14,6 +14,7 @@ class FirebaseAuthRepository implements AuthRepository {
       // create a new user
       final UserCredential userCredential = await firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
+
 // fetch user document from firestore
       DocumentSnapshot userDoc = await firestore
           .collection('users')
@@ -24,15 +25,11 @@ class FirebaseAuthRepository implements AuthRepository {
       AppUser user = AppUser(
         uid: userCredential.user!.uid,
         email: email,
-        name: userDoc['name'],
+        name: name,
       );
 
-
       // the newly created user is stored into the firestore database in users collection
-      await firestore
-          .collection("users")
-          .doc(user.uid)
-          .set(user.toJson());
+      await firestore.collection("users").doc(user.uid).set(user.toJson());
 
       return user;
     } catch (e) {
@@ -64,7 +61,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
     /// fetch user document from firestore
     DocumentSnapshot userDoc =
-    await firestore.collection("users").doc(firebaseUser.uid).get();
+        await firestore.collection("users").doc(firebaseUser.uid).get();
 
 // check if user doc exists
     if (!userDoc.exists) {
@@ -77,7 +74,6 @@ class FirebaseAuthRepository implements AuthRepository {
       email: firebaseUser.email!,
       name: userDoc['name'],
     );
-
   }
 
   @override
