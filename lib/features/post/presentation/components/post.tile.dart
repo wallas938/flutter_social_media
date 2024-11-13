@@ -36,7 +36,7 @@ class _PostTileState extends State<PostTile> {
   AppUser? currentUser;
 
 // post user
-  ProfileUser? postUser;
+  ProfileUser? userProfile;
 
 // on startup
   @override
@@ -57,7 +57,7 @@ class _PostTileState extends State<PostTile> {
     final fetchedUser = await profileCubit.getUserProfile(widget.post.userId);
     if (fetchedUser != null) {
       setState(() {
-        postUser = fetchedUser;
+        userProfile = fetchedUser;
       });
     }
   }
@@ -134,6 +134,7 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
+  // new comment request to postCubit
   void addComment() {
     // create a new comment
     final newComment = Comment(
@@ -151,7 +152,7 @@ class _PostTileState extends State<PostTile> {
     }
   }
 
-  // show options for deletion
+  // show delete post alert
   void showOptions() {
     showDialog(
       context: context,
@@ -195,9 +196,9 @@ class _PostTileState extends State<PostTile> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 // profile pic
-                postUser?.profileImageUrl != null
+                userProfile?.profileImageUrl != null
                     ? CachedNetworkImage(
-                        imageUrl: postUser!.profileImageUrl,
+                        imageUrl: userProfile!.profileImageUrl,
                         errorWidget: (context, url, error) =>
                             const Icon(Icons.person),
                         imageBuilder: (context, imageProvider) => Container(
@@ -238,7 +239,7 @@ class _PostTileState extends State<PostTile> {
                   ), // GestureDetector
               ],
             ),
-          ), // Row
+          ),
           // image
           CachedNetworkImage(
             imageUrl: widget.post.imageUrl,
@@ -247,7 +248,7 @@ class _PostTileState extends State<PostTile> {
             fit: BoxFit.cover,
             placeholder: (context, url) => const SizedBox(height: 430),
             errorWidget: (context, url, error) => const Icon(Icons.error),
-          ), //
+          ),
 
           // buttons -> like, comment, timestamp
           Padding(
@@ -308,22 +309,22 @@ class _PostTileState extends State<PostTile> {
 
           // CAPTION
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
-            child: Row(
-              children: [
-                // username
-                Text(
-                  widget.post.userName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ), // Text
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+              child: Row(
+                children: [
+                  // username
+                  Text(
+                    widget.post.userName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ), // Text
 
-                const SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
-                // text
-                Text(widget.post.text),
-              ],
-            )
-          ),
+                  // text
+                  Text(widget.post.text),
+                ],
+              )),
 
           // COMMENT SECTION
           BlocBuilder<PostCubit, PostState>(
@@ -332,7 +333,7 @@ class _PostTileState extends State<PostTile> {
               if (state is PostsLoaded) {
                 // final individual post
                 final post =
-                state.posts.firstWhere((post) => post.id == widget.post.id);
+                    state.posts.firstWhere((post) => post.id == widget.post.id);
 
                 if (post.comments.isNotEmpty) {
                   // how many comments to show
@@ -355,7 +356,8 @@ class _PostTileState extends State<PostTile> {
                             // name
                             Text(
                               comment.userName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
 
                             const SizedBox(width: 10),
@@ -367,7 +369,6 @@ class _PostTileState extends State<PostTile> {
                           ],
                         ),
                       );
-
                     },
                   ); // ListView.builder
                 }
@@ -386,7 +387,7 @@ class _PostTileState extends State<PostTile> {
                 ); // Center
               }
             },
-          ), // BlocBuilder
+          ),
         ],
       ),
     );
