@@ -7,6 +7,7 @@ import 'package:flutter_social_project/features/authentication/presentation/cubi
 import 'package:flutter_social_project/features/post/domain/entities/comment.dart';
 import 'package:flutter_social_project/features/post/domain/entities/post.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 
@@ -278,14 +279,24 @@ class _PostTileState extends State<PostTile> {
                 ), //
 
                 const SizedBox(width: 20),
-
-                // comment button
+// comment button
                 GestureDetector(
                   onTap: openNewCommentBox,
-                  child: const Icon(Icons.comment),
+                  child: Icon(
+                    Icons.comment,
+                    color: Theme.of(context).colorScheme.primary,
+                  ), // Icon
                 ), // GestureDetector
 
-                Text(widget.post.comments.length.toString()),
+                const SizedBox(width: 5),
+
+                Text(
+                  widget.post.comments.length.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 12,
+                  ), // TextStyle
+                ), // Text
 
                 const Spacer(),
 
@@ -293,9 +304,91 @@ class _PostTileState extends State<PostTile> {
                 Text(widget.post.timestamp.toString()),
               ],
             ),
-          ) // CachedNetworkImage
+          ),
+
+          // CAPTION
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
+            child: Row(
+              children: [
+                // username
+                Text(
+                  widget.post.userName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ), // Text
+
+                const SizedBox(width: 10),
+
+                // text
+                Text(widget.post.text),
+              ],
+            )
+          ),
+
+          // COMMENT SECTION
+          BlocBuilder<PostCubit, PostState>(
+            builder: (context, state) {
+              // LOADED
+              if (state is PostsLoaded) {
+                // final individual post
+                final post =
+                state.posts.firstWhere((post) => post.id == widget.post.id);
+
+                if (post.comments.isNotEmpty) {
+                  // how many comments to show
+                  int showCommentCount = post.comments.length;
+
+                  // comment section
+                  return ListView.builder(
+                    itemCount: showCommentCount,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      // get individual comment
+                      final comment = post.comments[index];
+
+                      // comment tile UI
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: Row(
+                          children: [
+                            // name
+                            Text(
+                              comment.userName,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            // comment text
+                            Text(comment.text),
+
+                            const Spacer(),
+                          ],
+                        ),
+                      );
+
+                    },
+                  ); // ListView.builder
+                }
+              }
+
+              // LOADING..
+              if (state is PostsLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              // ERROR
+              else if (state is PostsError) {
+                return Center(child: Text(state.message));
+              } else {
+                return const Center(
+                  child: Text("Something went wrong.."),
+                ); // Center
+              }
+            },
+          ), // BlocBuilder
         ],
       ),
-    ); // Column
+    );
   }
 }
