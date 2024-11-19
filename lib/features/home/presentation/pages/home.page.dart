@@ -5,6 +5,7 @@ import 'package:flutter_social_project/features/post/presentation/components/pos
 import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/post/presentation/pages/upload.post.page.dart';
+import 'package:flutter_social_project/responsive/constrained.scaffold.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       appBar: AppBar(
         title: const Text("H O M E"),
         actions: [

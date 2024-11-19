@@ -12,6 +12,7 @@ import 'package:flutter_social_project/features/post/presentation/cubits/post.cu
 import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
+import 'package:flutter_social_project/responsive/constrained.scaffold.dart';
 
 class UploadPostPage extends StatefulWidget {
   const UploadPostPage({super.key});
@@ -148,7 +149,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
   }
 
   Widget buildUploadPage() {
-    return Scaffold(
+    return ConstrainedScaffold(
       // APP BAR
       appBar: AppBar(
         title: const Text("Create Post"),

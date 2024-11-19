@@ -14,6 +14,7 @@ import 'package:flutter_social_project/features/profile/presentation/cubits/prof
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.states.dart';
 import 'package:flutter_social_project/features/profile/presentation/pages/edit.profile.page.dart';
 import 'package:flutter_social_project/features/profile/presentation/pages/follower.page.dart';
+import 'package:flutter_social_project/responsive/constrained.scaffold.dart';
 
 class ProfilePage extends StatefulWidget {
   final String uid;
@@ -89,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
           profileUser = state.profileUser;
           final isFollowing = profileUser.followers.contains(currentUser!.uid);
 
-          return Scaffold(
+          return ConstrainedScaffold(
             // APP BAR
             appBar: AppBar(
               centerTitle: true,

@@ -10,6 +10,7 @@ import 'package:flutter_social_project/features/authentication/presentation/comp
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.states.dart';
+import 'package:flutter_social_project/responsive/constrained.scaffold.dart';
 
 class EditProfilePage extends StatefulWidget {
   final ProfileUser user;
@@ -78,7 +79,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget buildEditPage({double uploadProgress = 0.0}) {
-    return Scaffold(
+    return ConstrainedScaffold(
       appBar: AppBar(
         title: const Text("Edit Profile"),
         foregroundColor: Theme.of(context).colorScheme.primary,

@@ -3,13 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
 import 'package:flutter_social_project/features/home/presentation/components/my.drawer.title.dart';
 import 'package:flutter_social_project/features/profile/presentation/pages/profile.page.dart';
+import 'package:flutter_social_project/features/search/presentation/pages/search.page.dart';
+import 'package:flutter_social_project/features/settings/pages/setting.page.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final authCubit = context.read<AuthCubit>();
 
     return Drawer(
@@ -55,22 +56,35 @@ class MyDrawer extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfilePage(uid: userUid,),
+                      builder: (context) => ProfilePage(
+                        uid: userUid,
+                      ),
                     ),
                   );
                 },
               ),
 
+              // search tile
               MyDrawerTile(
                 title: "S E A R C H",
                 icon: Icons.search,
-                onTap: () {},
-              ),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchPage(),
+                  ), // MaterialPageRoute
+                ),
+              ), // MyDrawerTile
 
               MyDrawerTile(
                 title: "S E T T I N G S",
                 icon: Icons.settings,
-                onTap: () {},
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPage(),
+                  ), // MaterialPageRoute
+                ),
               ),
 
               const Spacer(),
