@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -11,6 +10,8 @@ import 'package:flutter_social_project/features/authentication/presentation/cubi
 import 'package:flutter_social_project/features/post/domain/entities/post.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
+import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
+import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 
 class UploadPostPage extends StatefulWidget {
   const UploadPostPage({super.key});
@@ -20,6 +21,7 @@ class UploadPostPage extends StatefulWidget {
 }
 
 class _UploadPostPageState extends State<UploadPostPage> {
+
   // mobile image pick
   PlatformFile? imagePickedFile;
 
@@ -32,16 +34,31 @@ class _UploadPostPageState extends State<UploadPostPage> {
   // current user
   AppUser? currentUser;
 
+  // post user
+  ProfileUser? userProfile;
+
   @override
   void initState() {
     super.initState();
     getCurrentUser();
+    fetchUserProfile();
   }
 
 // get current user
   void getCurrentUser() async {
     final authCubit = context.read<AuthCubit>();
     currentUser = authCubit.currentUser;
+  }
+
+  Future<void> fetchUserProfile() async {
+    final profileCubit = context.read<ProfileCubit>();
+
+    final fetchedUser = await profileCubit.getUserProfile(currentUser!.uid);
+    if (fetchedUser != null) {
+      setState(() {
+        userProfile = fetchedUser;
+      });
+    }
   }
 
 // pick image
@@ -54,7 +71,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
     if (result != null) {
       setState(() {
         imagePickedFile = result.files.first;
-
+        print(imagePickedFile);
         if (kIsWeb) {
           webImage = imagePickedFile!.bytes;
         }
@@ -76,7 +93,7 @@ class _UploadPostPageState extends State<UploadPostPage> {
     final newPost = Post(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       userId: currentUser!.uid,
-      userName: currentUser!.name,
+      userName: userProfile!.name,
       text: textController.text,
       imageUrl: '',
       timestamp: DateTime.now(),
@@ -154,11 +171,12 @@ class _UploadPostPageState extends State<UploadPostPage> {
               Image.memory(
                 webImage!,
                 width: double.infinity,
+                height: 300,
               ),
 
             // image preview for mobile
             if (!kIsWeb && imagePickedFile != null)
-              Image.file(File(imagePickedFile!.path!)),
+              Image.file(File(imagePickedFile!.path!),height: 150,),
 
             // pick image button
             MaterialButton(

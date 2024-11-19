@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/domain/entities/app.user.dart';
@@ -6,10 +7,12 @@ import 'package:flutter_social_project/features/authentication/presentation/comp
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
 import 'package:flutter_social_project/features/post/domain/entities/comment.dart';
 import 'package:flutter_social_project/features/post/domain/entities/post.dart';
+import 'package:flutter_social_project/features/post/presentation/components/comment.tile.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
 import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/profile/domain/entities/profile.user.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
+import 'package:flutter_social_project/features/profile/presentation/pages/profile.page.dart';
 
 class PostTile extends StatefulWidget {
   final Post post;
@@ -35,7 +38,7 @@ class _PostTileState extends State<PostTile> {
 // current user
   AppUser? currentUser;
 
-// post user
+// Current user
   ProfileUser? userProfile;
 
 // on startup
@@ -44,7 +47,7 @@ class _PostTileState extends State<PostTile> {
     super.initState();
 
     getCurrentUser();
-    fetchPostUser();
+    fetchUserProfile();
   }
 
   void getCurrentUser() {
@@ -53,7 +56,8 @@ class _PostTileState extends State<PostTile> {
     isOwnPost = (widget.post.userId == currentUser!.uid);
   }
 
-  Future<void> fetchPostUser() async {
+  Future<void> fetchUserProfile() async {
+    final profileCubit = context.read<ProfileCubit>();
     final fetchedUser = await profileCubit.getUserProfile(widget.post.userId);
     if (fetchedUser != null) {
       setState(() {
@@ -140,8 +144,8 @@ class _PostTileState extends State<PostTile> {
     final newComment = Comment(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       postId: widget.post.id,
-      userId: widget.post.userId,
-      userName: widget.post.userName,
+      userId: currentUser!.uid,
+      userName: currentUser!.name,
       text: commentTextController.text,
       timestamp: DateTime.now(),
     ); // Comment
@@ -178,6 +182,16 @@ class _PostTileState extends State<PostTile> {
     );
   }
 
+  Future<String?> fetchOneUserProfileImage(String uid) async {
+    final profileCubit = context.read<ProfileCubit>();
+    final fetchedUser = await profileCubit.getUserProfile(uid);
+    if (fetchedUser != null) {
+      return fetchedUser.profileImageUrl;
+    }
+
+    return null;
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -190,54 +204,65 @@ class _PostTileState extends State<PostTile> {
       child: Column(
         children: [
           // Top section: profile pic / name / delete button
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // profile pic
-                userProfile?.profileImageUrl != null
-                    ? CachedNetworkImage(
-                        imageUrl: userProfile!.profileImageUrl,
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.person),
-                        imageBuilder: (context, imageProvider) => Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ), // Container
-                      ) // CachedNetworkImage
-                    : const Icon(Icons.person),
-
-                const SizedBox(
-                  width: 10,
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(
+                  uid: widget.post.userId,
                 ),
-                // name
-                Text(
-                  widget.post.userName,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ), // Text
+              ), // MaterialPageRoute
+            ), // onTap
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // profile pic
+                  userProfile?.profileImageUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: userProfile!.profileImageUrl
+                              .toString(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.person),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ), // Container
+                        ) // CachedNetworkImage
+                      : const Icon(Icons.person),
 
-                const Spacer(),
-                // delete button
-                if (isOwnPost)
-                  GestureDetector(
-                    onTap: showOptions,
-                    child: Icon(
-                      Icons.delete,
-                      color: Theme.of(context).colorScheme.primary,
-                    ), // Icon
-                  ), // GestureDetector
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  // name
+                  Text(
+                    widget.post.userName,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ), // Text
+
+                  const Spacer(),
+                  // delete button
+                  if (isOwnPost)
+                    GestureDetector(
+                      onTap: showOptions,
+                      child: Icon(
+                        Icons.delete,
+                        color: Theme.of(context).colorScheme.primary,
+                      ), // Icon
+                    ), // GestureDetector
+                ],
+              ),
             ),
           ),
           // image
@@ -349,29 +374,12 @@ class _PostTileState extends State<PostTile> {
                       final comment = post.comments[index];
 
                       // comment tile UI
-                      return Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: Row(
-                          children: [
-                            // name
-                            Text(
-                              comment.userName,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-
-                            const SizedBox(width: 10),
-
-                            // comment text
-                            Text(comment.text),
-
-                            const Spacer(),
-                          ],
-                        ),
-                      );
+                      return CommentTile(comment: comment);
                     },
                   ); // ListView.builder
                 }
+
+                return Container();
               }
 
               // LOADING..

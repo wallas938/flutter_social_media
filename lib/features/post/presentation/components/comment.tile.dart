@@ -15,7 +15,6 @@ class CommentTile extends StatefulWidget {
 }
 
 class _CommentTileState extends State<CommentTile> {
-
   // current user
   AppUser? currentUser;
   bool isOwnPost = false;
@@ -59,12 +58,10 @@ class _CommentTileState extends State<CommentTile> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         children: [
           // name
@@ -79,6 +76,16 @@ class _CommentTileState extends State<CommentTile> {
           Text(widget.comment.text),
 
           const Spacer(),
+
+          // delete button
+          if (isOwnPost)
+            GestureDetector(
+              onTap: showOptions,
+              child: Icon(
+                Icons.more_horiz,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
         ],
       ), // Row
     ); // Padding

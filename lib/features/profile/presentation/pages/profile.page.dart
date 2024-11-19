@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_project/features/authentication/domain/entities/app.user.dart';
 import 'package:flutter_social_project/features/authentication/presentation/cubits/auth.cubit.dart';
+import 'package:flutter_social_project/features/post/presentation/components/post.tile.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.cubit.dart';
+import 'package:flutter_social_project/features/post/presentation/cubits/post.states.dart';
 import 'package:flutter_social_project/features/profile/presentation/components/bio.box.dart';
+import 'package:flutter_social_project/features/profile/presentation/components/follow.button.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.cubit.dart';
 import 'package:flutter_social_project/features/profile/presentation/cubits/profile.states.dart';
 import 'package:flutter_social_project/features/profile/presentation/pages/edit.profile.page.dart';
@@ -23,6 +27,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   late final AppUser? currentUser = authCubit.currentUser;
 
+  //posts
+  int postCount = 0;
+
 // on startup,
   @override
   void initState() {
@@ -32,14 +39,34 @@ class _ProfilePageState extends State<ProfilePage> {
     profileCubit.fetchUserProfile(widget.uid);
   }
 
+/*
+*
+* Follow / unFollow Method
+*
+* */
+  void followButtonPressed() {
+    // final profileState = profileCubit.state;
+    // if (profileState is! ProfileLoaded) {
+    //   return; // return if profile is not loaded
+    // }
+
+    // final profileUser = profileState.profileUser;
+    // final isFollowing = profileUser.followers.contains(currentUser!.uid);
+
+    profileCubit.toggleFollow(currentUser!.uid, widget.uid);
+  }
+
 // BUILD UI
   @override
   Widget build(BuildContext context) {
+    bool isOwnPost = currentUser != null && widget.uid == currentUser!.uid;
+
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         // loaded
         if (state is ProfileLoaded) {
           final user = state.profileUser;
+          final isFollowing = user.followers.contains(currentUser!.uid);
 
           return Scaffold(
             // APP BAR
@@ -49,28 +76,31 @@ class _ProfilePageState extends State<ProfilePage> {
               foregroundColor: Theme.of(context).colorScheme.primary,
               actions: [
                 // edit profile button
-                IconButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditProfilePage(
-                        user: user,
-                      ),
-                    ), // MaterialPageRoute
-                  ),
-                  icon: const Icon(Icons.settings),
-                ), // IconButton
+                if (isOwnPost)
+                  IconButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProfilePage(
+                          user: user,
+                        ),
+                      ), // MaterialPageRoute
+                    ),
+                    icon: const Icon(Icons.settings),
+                  ), // IconButton
               ],
             ), // AppBar
 
             // BODY
-            body: Column(
+            body: ListView(
               children: [
                 // email
-                Text(
-                  user.email,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                Center(
+                  child: Text(
+                    user.email,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
                 ), // Text
 
                 const SizedBox(height: 25),
@@ -100,7 +130,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ), // BoxDecoration
                   ), // Container
-                ), // CachedNetworkImage
+                ),
+
+                const SizedBox(height: 25),
+                if (!isOwnPost)
+                  FollowButton(
+                    onPressed: followButtonPressed,
+                    isFollowing: isFollowing,
+                  ),
 
                 const SizedBox(height: 25),
 
@@ -117,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ), // Text
                     ],
                   ), // Row
-                ), // Padding
+                ),
 
                 const SizedBox(height: 10),
 
@@ -136,10 +173,53 @@ class _ProfilePageState extends State<ProfilePage> {
                       ), // Text
                     ],
                   ), // Row
-                ), // Paddi
+                ),
+
+                const SizedBox(height: 10),
+
+                // list of posts from this user
+                BlocBuilder<PostCubit, PostState>(builder: (context, state) {
+                  // posts loaded..
+                  if (state is PostsLoaded) {
+                    // filter posts by user id
+                    final userPosts = state.posts
+                        .where((post) => post.userId == widget.uid)
+                        .toList();
+
+                    postCount = userPosts.length;
+
+                    return ListView.builder(
+                      itemCount: postCount,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        // get individual post
+                        final post = userPosts[index];
+
+                        // return as post tile UI
+                        return PostTile(
+                          post: post,
+                          onDeletePressed: () =>
+                              context.read<PostCubit>().deletePost(post.id),
+                        ); // PostTile
+                      },
+                    );
+                  }
+                  //  posts loading..
+                  else if (state is PostsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return const Center(
+                      child: Text("No posts.."),
+                    ); // Center
+
+                    // posts loading..
+                    // handle loading or error states if necessary
+                  }
+                })
               ],
-            ), // Center
-          ); // Scaffold
+            ),
+          );
         }
 
         // loading..

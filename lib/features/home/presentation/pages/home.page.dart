@@ -76,7 +76,6 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 // get individual post
                 final post = allPosts[index];
-
                 // image
                 return PostTile(
                   post: post,
