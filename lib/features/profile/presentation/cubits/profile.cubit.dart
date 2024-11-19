@@ -95,7 +95,6 @@ class ProfileCubit extends Cubit<ProfileState> {
     try {
       await profileRepository.toggleFollow(currentUserId, targetUserId);
 
-      await fetchUserProfile(targetUserId);
     } catch (e) {
       emit(ProfileError("Error toggling follow: $e"));
     }
